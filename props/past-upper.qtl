@@ -1,0 +1,1 @@
+prop past: !Exists t. Exists x. Exists l. (write(t,x) & ((!(read(t,x) | rel(t,l))) S[<=100] acq(t,l)))

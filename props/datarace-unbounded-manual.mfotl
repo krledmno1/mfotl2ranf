@@ -1,0 +1,58 @@
+EXISTS t1. EXISTS t2. EXISTS x.
+(
+  (
+    (read(t1,x) AND ONCE write(t2,x))
+    OR
+    (write(t1,x) AND ONCE (read(t2,x) OR write(t2,x)))
+  ) AND NOT
+  EXISTS l.
+  (
+    (
+      (
+        NOT
+        (
+          (read(t1,x) OR write(t1,x)) AND
+          (
+            ONCE
+            (
+              (read(t1,x) OR write(t1,x)) AND
+              ((NOT rel(t1,l)) SINCE acq(t1,l)) AND NOT
+              PREVIOUS (ONCE (read(t1,x) OR write(t1,x)))
+            )
+          ) AND NOT
+          ((NOT rel(t1,l)) SINCE acq(t1,l))
+        )
+      )
+      SINCE
+      (
+        (read(t1,x) OR write(t1,x)) AND
+        ((NOT rel(t1,l)) SINCE acq(t1,l)) AND NOT
+        PREVIOUS (ONCE (read(t1,x) OR write(t1,x)))
+      )
+    )
+    AND
+    (
+      (
+        NOT
+        (
+          (read(t2,x) OR write(t2,x)) AND
+          (
+            ONCE
+            (
+              (read(t2,x) OR write(t2,x)) AND
+              ((NOT rel(t2,l)) SINCE acq(t2,l)) AND NOT
+              PREVIOUS (ONCE (read(t2,x) OR write(t2,x)))
+            )
+          ) AND NOT
+          ((NOT rel(t2,l)) SINCE acq(t2,l))
+        )
+      )
+      SINCE
+      (
+        (read(t2,x) OR write(t2,x)) AND
+        ((NOT rel(t2,l)) SINCE acq(t2,l)) AND NOT
+        PREVIOUS (ONCE (read(t2,x) OR write(t2,x)))
+      )
+    )
+  )
+)

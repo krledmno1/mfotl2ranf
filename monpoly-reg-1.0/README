@@ -1,0 +1,184 @@
+MonPoly-Reg is a monitor for checking whether log files are policy
+compliant.  Policies are specified by formulas in metric first-order
+temporal logic (MFOTL).  Details on MFOTL and the core monitoring
+algorithm are described in [1]. MonPoly-Reg is an implementation of
+the monitoring algorithm where regular relations are represented by
+deterministic finite automata (DFAs). In contrast, the MonPoly tool
+(also availabale at https://sourceforge.net/projects/monpoly) is an
+implementation of the algorithm where relations are assumed to be
+finite and are implemented as sets of tuples. [2] gives a brief
+overview of MonPoly. We note that many aspects are shared by the two
+tools, for instance the input and output format.
+
+
+Requirements
+============
+
+1) OCaml compiler (http://caml.inria.fr/ocaml/index.en.html)
+  MonPoly-Reg has been tested with version 3.12.1 of OCaml under
+  Linux. It should also compile and work with most not-too-old
+  versions of OCaml under other operating systems.
+
+The following additional OCaml tools are used:
+  ocamllex  for generating the lexers
+  ocamlyacc for generating the parsers
+  ocamldep  for generating dependencies between modules 
+  ocamldoc  for generating the documentation (optional)
+
+On a Debian or Ubuntu system, the OCaml compiler and tools can be
+installed with the command
+  apt-get install ocaml
+For installing OCaml on other systems, see the OCaml website
+(http://caml.inria.fr/).  There you also find links to binary OCaml
+distributions for other Linux distributions (Fedora, Red Hat, and
+Gentoo), Microsoft Windows, and MacOS X.  For Microsoft Windows you
+also need to install the Cygwin environment (http://www.cygwin.com/).
+
+
+2) MONA library (http://www.brics.dk/mona/)
+  MonPoly-Reg has been tested with version 1.4-15 of the MONA library.
+
+
+
+Compiling
+=========
+
+# create a symbolic link called 'mona' in the MonPoly-Reg's 'src'
+  directory to the MONA directory containg the source files
+
+$ make
+$ make install    # optional, to put the tool on an executable path
+
+$ make clean      # optional, to delete the object and other generated files
+$ make clean-all  # also deletes the executable and the documentation
+
+
+Running
+=======
+
+Usage: 
+monpoly-reg -sig <file> -formula <file> [-negate] [-log <file>]
+            [-help] [-version] [-debug <unit>] [-verbose] [-check] 
+            [-sigout] [-mem] [-mem2] [-nonewlastts] [-parselog]
+            [-ignore_parse_errors] [-stop_at_out_of_order_ts] [-mona_dir]
+
+The options are:
+    -sig	 		Choose the signature file
+    -formula 			Choose the formula file 
+    -negate			Analyze the negation of the input formula
+    -log 			Choose the log file
+    -version 			Display the version (and exit)
+    -debug			Choose unit to debug
+    -verbose			Turn on verbose mode
+    -check			Check if formula is monitorable (and exit)
+    -sigout			Show the output signature (and exit)
+    -mem 			Show memory usage on stderr
+    -mem2 			Show memory usage on stderr (variant)
+    -nonewlastts 		Do not add a last maximal time-stamp
+    -parselog 			Parse the log without monitoring
+    -ignore_parse_errors 	Ignore parse errors
+    -stop_at_out_of_order_ts  	Ignore parse errors
+    -mona_dir			Set directory with Mona automata
+
+
+
+
+Example
+=======
+
+To run MonPoly-Reg on the "rv11" example, which is contained in the
+example directory, start MonPoly-Reg as follows from a Unix shell:
+  ./monpoly-reg -sig examples/rv11.sig -formula examples/rv11.mfotl -log examples/rv11.log -negate
+
+In this example, the formula file (examples/rv11.mfotl) contains the
+policy expressed as a formula in MFOTL.  For background on MFOTL, see
+[1].  In the example, the formula is 
+  publish(?r) IMPLIES ONCE[0,7d] approve(?r) 
+It expresses the policy that if a report is published then the report
+must have been approved within the last 7 days.
+
+The log file (examples/rv11.log) shows for each time point the tuples
+in the relations.  For instance, the following 2 lines
+  @1307955600 approve (163)
+              publish (160)
+mean that at a time point with time 1307955600 the relation approve
+consists of the value 163 and the relation publish consists of the
+value 160.  If time units such as days or hours are used in the
+formula, then time is assumed to be Unix time.  MonPoly-Reg reads from
+stdin if no log file is specified with the switch -log.
+
+The relations used in the formula and the log must be specified in the
+signature file (examples/rv11.sig).  In the example, the signature file 
+contains the 2 lines:
+   publish(int)  
+   approve(int)
+These specify that there are two relations, publish and approve, each
+with a single parameter of type integer.  Relations can have multiple
+parameters (separated by a comma) and parameters can also be of type
+string.
+
+When MonPoly-Reg processes the log file examples/rv11.log, it outputs to
+stdout
+   @1307955600 (time-point 1): (160)
+   @1308477599 (time-point 2): (152)
+The output means that at time point 1 (with time 1307955600) the
+policy was violated by report 160 and at time point 2 (with time
+1308477599) the policy was violated by report 152.  Note that since we
+use the -negate switch, these are the violations with respect to the
+given policy.  In other words, the output consists of the time points
+and the valuations at which the negation of the formula from the
+formula file is satisfied.  Error messages are written to stderr.
+
+
+File Description
+================
+
+AUTHORS                 Authors of the tool
+CHANGES			Change log
+LICENSE                 License file
+README			This file
+Makefile		Commands to compile the monitor
+/doc 			Directory for the documentation (generated with 'make doc')
+/examples  		Directory with some simple formulas and log files
+/src                    Directory with the source code
+  misc.ml[i]   		Miscellaneous helper functions
+  strmap.ml[i]		Dummy module defining string maps
+  predicate.ml[i]  	Module for operations on predicates
+  MFOTL.ml[i]		Module for operations on MFOTL formulas
+  mona.mli		OCaml interface to the MONA library
+  dfa_stubs.c		Stubs for the MONA library
+  dfa_store.ml[i]	Module for obtaining DFAs for formulas of the form x<y
+  dfa_aux.[c|h]		Implementation of auxiliary operations on DFAs
+  aut.ml[i]		Module for outputting the tuples "accepted" by a MONA DFA 
+  db.ml[i]		Module defining input schemas 
+  rewriting.ml[i]	Module for rewriting operations on MFOTL formulas
+  algorithm.ml[i]    	The monitoring algorithm
+  formula_lexer.mll   	Lexer for MFOTL formulas 
+  formula_parser.mly 	Parser for MFOTL formulas 
+  log_parser.mll	Lexer for logs (in the general format)
+  log_parser.mly	Parser for logs (in the general format)
+  log.ml[i]		Module for parsing log files
+  perf.ml[i]		Module for performance evaluation
+  main.ml		The tool's entry point 
+
+Contact
+=======
+
+If you encounter problems, please contact Eugen Zalinescu
+(eugen.zalinescu@inf.ethz.ch).
+ 
+We would highly appreciate it if you drop us a mail when you are using
+the tool in a project.  Feedback of any kind on the tool is welcome.
+
+
+References
+==========
+
+[1] D. Basin, F. Klaedtke, S. Mueller, B. Pfitzmann: "Runtime
+    Monitoring of Metric First-Order Temporal Properties." In the
+    Proceedings of the 28th International Conference on Foundations of
+    Software Technology and Theoretical Computer Science (FSTTCS'08).
+
+[2] D. Basin, M. Harvan, F. Klaedtke, E. Zalinescu: "MONPOLY:
+    Monitoring usage-control policies." In the Proceedings of the 2nd
+    International Conference on Runtime Verification (RV'11). 

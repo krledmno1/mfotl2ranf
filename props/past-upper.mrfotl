@@ -1,0 +1,1 @@
+EXISTS ?l. write(?t,?x) AND ((NOT (read(?t,?x) OR rel(?t,?l))) SINCE[0,100] acq(?t,?l))

@@ -1,0 +1,45 @@
+AND
+|__inf = 0
+|OR
+||EXISTS t x l.
+|||AND
+||||SINCE[0, *]
+|||||NOT
+||||||OR
+|||||||AND
+||||||||read(t, x)
+||||||||SINCE[0, *]
+|||||||||TRUE
+|||||||||read(t, x)
+||||||||SINCE[0, *]
+|||||||||TRUE
+|||||||||acq(t, l)
+|||||||AND
+||||||||rel(t, l)
+||||||||SINCE[0, *]
+|||||||||TRUE
+|||||||||read(t, x)
+||||||||SINCE[0, *]
+|||||||||TRUE
+|||||||||acq(t, l)
+|||||AND
+||||||acq(t, l)
+||||||SINCE[0, *]
+|||||||TRUE
+|||||||read(t, x)
+||||||SINCE[0, *]
+|||||||TRUE
+|||||||acq(t, l)
+||||write(t, x)
+||EXISTS t x l.
+|||AND
+||||SINCE[0, *]
+|||||NOT
+||||||rel(t, l)
+|||||acq(t, l)
+||||write(t, x)
+||||NOT
+|||||SINCE[0, *]
+||||||TRUE
+||||||read(t, x)
+

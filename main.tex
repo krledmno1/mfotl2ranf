@@ -1,0 +1,111 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[left=2.5cm,right=2.5cm,top=3.75cm,bottom=3.75cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\pagenumbering{gobble}
+
+%%% Parameters
+\newcommand{\tracelength}{\ell}
+\newcommand{\mfotlto}{900}
+
+%%% Query names
+\newcommand{\races}{\textsc{Datarace}}
+\newcommand{\racesint}[1]{\ensuremath{\races_{\blacklozenge}^{#1}}}
+\newcommand{\racesintsharp}[1]{\ensuremath{\races^{#1}}}
+\newcommand{\sracesint}[1]{\ensuremath{\widehat{\races}_{\blacklozenge}^{#1}}}
+\newcommand{\sracesintsharp}[1]{\ensuremath{\widehat{\races}^{#1}}}
+\newcommand{\pastlock}{\textsc{BlindWrite}}
+\newcommand{\pastlockint}[1]{\ensuremath{\pastlock^{#1}}}
+\newcommand{\futurelock}{\textsc{NeedlessRead}}
+\newcommand{\futurelockint}[1]{\ensuremath{\futurelock^{#1}}}
+
+%%% Tool names
+\newcommand{\mfotltool}{\textsc{MFOTL2RANF}}
+\newcommand{\vmon}{\textsc{VeriMon}}
+\newcommand{\monpoly}{\textsc{MonPoly}}
+\newcommand{\dejavu}{\textsc{DejaVu}}
+\newcommand{\dejavuperm}{\ensuremath{\dejavu_{\pi}}}
+\newcommand{\mpreg}{\textsc{MonPoly-reg}}
+
+%%% Misc
+\newcommand{\csp}{\;\;}
+\newcommand{\tratsize}{\footnotesize}
+\newcommand{\trat}{{\tratsize ratio}}
+\newcommand{\mfotlcaption}{The abbreviation TO denotes a timeout of $\mfotlto$ seconds. The ratios are computed between consecutive trace lengths in the table.}
+
+\begin{document}
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{}}
+Query&\mfotltool\\
+\hline
+\input{exps_mfotl_00.tex}
+\end{tabular}
+\caption{The translation time of \mfotltool{} on the benchmarked queries.}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$10\,005$&$100\,005$&$1\,050\,005$\\
+\hline
+\input{exps_mfotl_01.tex}
+\end{tabular}
+\caption{The queries $\sracesint{[0,\infty]}$/$\racesint{[0,\infty]}$ and traces from Havelund et al. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$250$&$500$&$1\,000$&$2\,000$&$4\,000$&$8\,000$&$16\,000$\\
+\hline
+\input{exps_mfotl_02.tex}
+\end{tabular}
+\caption{The queries $\sracesint{[0,\infty]}$/$\racesint{[0,\infty]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$250$&$500$&$1\,000$&$2\,000$&$4\,000$&$8\,000$&$16\,000$\\
+\hline
+\input{exps_mfotl_03.tex}
+\end{tabular}
+\caption{The queries $\sracesintsharp{[0,\infty]}$/$\racesintsharp{[0,\infty]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$250$&$500$&$1\,000$&$2\,000$&$4\,000$&$8\,000$\\
+\hline
+\input{exps_mfotl_04.tex}
+\end{tabular}
+\caption{The query $\racesintsharp{[0,\tracelength/10]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$4\,000$&$8\,000$&$16\,000$&$32\,000$\\
+\hline
+\input{exps_mfotl_05.tex}
+\end{tabular}
+\caption{The query $\pastlockint{[0,\infty]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$250$&$500$&$1\,000$&$2\,000$&$4\,000$&$8\,000$&$16\,000$\\
+\hline
+\input{exps_mfotl_06.tex}
+\end{tabular}
+\caption{The queries $\pastlockint{[0,\tracelength/10]}$/$\pastlockint{[\tracelength/10,\infty]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{@{}l@{\csp}|@{\csp}r@{\csp}r@{\csp}r@{\csp}r@{}}
+\multicolumn{1}{r@{\csp}|@{\csp}}{$\tracelength={}$}&$4\,000$&$8\,000$&$16\,000$&$32\,000$\\
+\hline
+\input{exps_mfotl_07.tex}
+\end{tabular}
+\caption{The query $\futurelockint{[0,\tracelength/10]}$ and our pseudorandom traces. \mfotlcaption}
+\end{table}
+\end{document}
