@@ -26,9 +26,24 @@ becomes available.
 
 ---
 
+# Build
+
+We recommend running the experiments using `docker` and the provided `Dockerfile`.
+Please set up at least 8 GiB of main memory for your Docker container.
+Note that the first command below will take some time to finish.
+```
+sudo docker build --no-cache -t mfotlranf .
+sudo docker run -it mfotlranf
+```
+Once you run the second command above you will
+obtain a shell with all the tools installed.
+
+---
+
 # Directory Structure:
 
 - `Dockerfile` - Dockerfile for this supplementary material
+- `mfotl2ranf` - the executable file of our tool MFOTL2RANF
 - `main.tex` - template of a LaTeX document with evaluation results
 - `exps_mfotl.sh` - script to run experiments in Section 4.3
 - `exps_sinceuntil.sh` - script to run experiments in Section 4.3
@@ -41,23 +56,9 @@ becomes available.
 
 Further tools:
 
-- `monpoly/` - the *MonPoly* tool and its verified core (*VeriMon*)
+- `monpoly/` - the *MonPoly* tool and its verified core *(VeriMon)*
 - `dejavu/` - the *DejaVu* tool
 - `monpoly-reg-1.0/` - the *MonPoly-Reg* tool
-
----
-
-# Build
-
-We recommend running the experiments using `docker` and the provided `Dockerfile`.
-Please set up at least 8 GiB of main memory for your Docker container.
-Note that the first command below will take some time to finish.
-```
-sudo docker build --no-cache -t mfotlranf .
-sudo docker run -it mfotlranf
-```
-Once you run the second command above you will
-obtain a shell with all the tools installed.
 
 ---
 
