@@ -266,5 +266,5 @@ and then rerun `python3 proc.py config_thesis.py`
 in the directory `sinceuntil/`.
 
 The mapping of the experiment names is summarized here:
-- Figure 4.17  -> `exp_sinceuntil_er_*`
-- Figure 4.18  -> `exp_sinceuntil_int_*`
+- Figure 4.18  -> `exp_sinceuntil_er_*`
+- Figure 4.19  -> `exp_sinceuntil_int_*`
