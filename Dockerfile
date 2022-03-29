@@ -2,7 +2,7 @@ FROM ubuntu:21.10
 
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y bc bison ca-certificates clang flex git gnuplot libgmp3-dev libssl-dev locales make m4 opam openjdk-8-jdk python3 scala texlive vim
+RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y automake bc bison ca-certificates clang flex git gnuplot libgmp3-dev libssl-dev locales m4 opam openjdk-8-jdk python3 scala texlive vim
 
 RUN adduser --disabled-password --gecos "" mfotlranf
 RUN locale-gen en_US.UTF-8 &&\
