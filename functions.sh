@@ -50,6 +50,10 @@ function run01A() {
 function run01B() {
   run "./monpoly/monpoly -formula z_${i}.smfotl -log z_${i}.log -sig z_${i}.sig -no_rw -nofilterrel -nofilteremptytp"
 }
+function run01C() {
+  run "./staticmon/z_${i} --log z_${i}.xlog"
+}
+
 function run02() {
   if [[ "${skip}" == "1" ]]
   then

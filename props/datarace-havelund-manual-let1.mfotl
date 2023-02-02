@@ -1,0 +1,16 @@
+LET acqs(t, l) = ONCE[0, *] (acq(t, l)) IN
+LET writes(t, x) = ONCE[0, *] (write(t, x)) IN
+LET holds(t, l) = (NOT (rel(t, l))) SINCE[0, *] (acq(t, l)) IN
+LET rw(t, x) = (read(t, x)) OR (write(t, x)) IN
+LET rws(t, x) = ONCE[0, *] rw(t, x) IN
+LET conflict(t1, t2, x) = rws(t1, x) AND writes(t2, x) IN
+LET all1(t1, t2, l, x) = acqs(t1, l) AND conflict(t1, t2, x) IN
+LET all2(t1, t2, l, x) = acqs(t2, l) AND conflict(t1, t2, x) IN
+LET change(t, x, l) = ONCE[0, *] ((PREVIOUS[0, *] ((rws(t, x) AND (NEXT[0, *] acqs(t, l))) AND (NOT acqs(t, l)))) AND acqs(t, l)) IN
+LET bad_access(t, x, l) = ONCE[0, *] (rw(t, x) AND acqs(t, l)) AND (NOT holds(t, l)) IN
+LET all(t1, t2, l, x) = all1(t1, t2, l, x) OR all2(t1, t2, l, x) IN
+(__inf = 0) AND (EXISTS t1. (EXISTS t2. (EXISTS x.
+(((rws(t1, x) AND writes(t2, x)) OR ((rws(t2, x) AND rws(t1, x)) AND writes(t2, x))) AND
+(NOT (EXISTS l. (((((acqs(t1, l) AND rws(t1, x) AND ((all(t1, t2, l, x) AND acqs(t2, l)) OR (all(t1, t2, l, x) AND (NOT rws(t2, x)))) AND
+  (NOT change(t2, x, l))) AND (NOT bad_access(t2, x, l))) AND
+  (NOT change(t1, x, l))) AND (NOT bad_access(t1, x, l))))))))))

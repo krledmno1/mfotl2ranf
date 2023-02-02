@@ -10,7 +10,9 @@ module type Timestamp = sig
   val memL: t -> t -> inter -> bool
   val memR: t -> t -> inter -> bool
   val rightI: inter -> t
+  val isFull: inter -> bool
   val dropL: inter -> inter
+  val dropR: inter -> inter
   val flipL: inter -> inter
 end
 
@@ -655,8 +657,29 @@ let map_nested f xss = List.map (List.map f) xss
 let rec pairwise f xs ys = match xs with [] -> []
                            | z :: zs -> Misc.union (List.map (f z) ys) (pairwise f zs ys)
 
-let once i f = Since (True, i, f)
-let eventually i f = Until (True, i, f)
+let rec once i f = match f with
+| Since (True, j, g) -> 
+  if T.isFull j
+    then if T.isFull i
+         then once i g
+         else Conj ((once (T.dropR i) g), (once i True))
+    else Since (True, i, f)
+| _ -> Since (True, i, f)
+
+
+  (* ONCE [a,b] SINCE f *)
+         
+
+let rec eventually i f = match f with
+| Until (True, j, g) -> 
+  if T.isFull j
+    then if T.isFull i
+         then eventually i g
+         else Conj ((eventually (T.dropR i) g), (eventually i True))
+    else Until (True, i, f)
+| _ -> Until (True, i, f)
+
+
 
 (* Figure 2.10 *)
 let rec gen v = function
@@ -1020,8 +1043,11 @@ module TimestampInt = struct
   | Interval (l, r, b1, false) -> lt v (add u r)
   let rightI = function
   | Interval (l, r, b1, b2) -> r
+  let isFull i = (not (tfin (rightI i))) && (memL zero zero i)
   let dropL = function
   | Interval (l, r, b1, b2) -> Interval (zero, r, true, b2)
+  let dropR = function
+  | Interval (l, r, b1, b2) -> Interval (l, None, b1, true)
   let flipL = function
   | Interval (l, r, b1, b2) -> if not (l = zero && b1) then Interval (zero, l, true, not b1) else failwith "invalid flipL"
 end

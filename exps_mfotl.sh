@@ -77,14 +77,15 @@ function gen-bounded() {
 }
 
 function ours() {
-  lineskip "\\vmon" run01A "ratios"
-  lineskip "\\monpoly" run01B "ratios"
+  # lineskip "\\vmon" run01A "ratios"
+  # lineskip "\\monpoly" run01B "ratios"
+  lineskip "staticmon" run01C "ratios"
 }
 
 function alltools() {
   ours
-  lineskip "\\dejavu" run02A "ratios"
-  lineskip "\\dejavuperm" run02B "ratios"
+  # lineskip "\\dejavu" run02A "ratios"
+  # lineskip "\\dejavuperm" run02B "ratios"
 }
 
 function transltime() {
@@ -117,13 +118,39 @@ function transltime() {
   echo "\\\\"
 }
 
+function static-compile() {
+
+for fma in $(ls z_*.smfotl); do
+
+  base=$(echo $fma | cut -d "." -f1)
+
+  monpoly-staticmon -sig $base.sig -formula $fma -explicitmon -explicitmon_prefix=./staticmon/src/staticmon/input_formula
+
+  cd staticmon
+  ninja -C builddir > /dev/null 2> /dev/null
+  cp ./builddir/bin/staticmon ./$base
+  cd ..
+
+done
+
+for log in $(ls z_*.log); do
+
+  base=$(echo $log | cut -d "." -f1)
+  cat $log | sed 's/.*/&\;/g' > "$base.xlog"
+
+done 
+
+}
+
 transltime > exps_mfotl_00.tex
 
 gen-havelund 0
 gen-unbounded "datarace-havelund-manual" 0 2
+static-compile
 echo "&\\multicolumn{3}{c}{\\sracesint{[0,\\infty]}}\\\\" > exps_mfotl_01.tex
 alltools >> exps_mfotl_01.tex
 gen-unbounded "datarace-havelund" 0 2
+static-compile
 echo "\\hline" >> exps_mfotl_01.tex
 echo "&\\multicolumn{3}{c}{\\racesint{[0,\\infty]}}\\\\" >> exps_mfotl_01.tex
 lineskip "\\dejavu" run02A "ratios" >> exps_mfotl_01.tex
@@ -131,40 +158,49 @@ lineskip "\\dejavuperm" run02B "ratios" >> exps_mfotl_01.tex
 
 gen-ours 0 6 250
 gen-unbounded "datarace-havelund-manual" 0 6
+static-compile
 echo "&\\multicolumn{7}{c}{\\sracesint{[0,\\infty]}}\\\\" > exps_mfotl_02.tex
 alltools >> exps_mfotl_02.tex
 gen-unbounded "datarace-havelund" 0 6
+static-compile
 echo "\\hline" >> exps_mfotl_02.tex
 echo "&\\multicolumn{7}{c}{\\racesint{[0,\\infty]}}\\\\" >> exps_mfotl_02.tex
 alltools >> exps_mfotl_02.tex
 
 gen-ours 0 6 250
 gen-unbounded "datarace-unbounded-manual" 0 6
+static-compile
 echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]}}\\\\" > exps_mfotl_03.tex
 alltools >> exps_mfotl_03.tex
 gen-unbounded "datarace-unbounded" 0 6
+static-compile
 echo "\\hline" >> exps_mfotl_03.tex
 echo "&\\multicolumn{7}{c}{\\racesintsharp{[0,\\infty]}}\\\\" >> exps_mfotl_03.tex
 alltools >> exps_mfotl_03.tex
 
 gen-ours 0 5 250
 gen-bounded "datarace-upper" 0 5 250 0
+static-compile
 alltools > exps_mfotl_04.tex
 
 gen-ours 0 3 4000
 gen-unbounded "past-unbounded" 0 3
+static-compile
 alltools > exps_mfotl_05.tex
 
 gen-ours 0 6 250
 gen-bounded "past-upper" 0 6 250 0
+static-compile
 echo "&\\multicolumn{7}{c}{\\pastlockint{[0,\\tracelength/10]}}\\\\" > exps_mfotl_06.tex
 alltools >> exps_mfotl_06.tex
 gen-bounded "past-lower" 0 6 250 1
+static-compile
 echo "\\hline" >> exps_mfotl_06.tex
 echo "&\\multicolumn{7}{c}{\\pastlockint{[\\tracelength/10,\\infty]}}\\\\" >> exps_mfotl_06.tex
 alltools >> exps_mfotl_06.tex
 
 gen-ours 0 3 4000
 gen-bounded "future-upper" 0 3 4000 0
+static-compile
 ours > exps_mfotl_07.tex
 lineskip "\\mpreg" run03 "ratios" >> exps_mfotl_07.tex
