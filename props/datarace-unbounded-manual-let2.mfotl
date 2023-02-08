@@ -1,0 +1,10 @@
+LET access(t, x) = (read(t, x)) OR (write(t, x)) IN
+LET holds(t, l) = (NOT (rel(t, l))) SINCE (acq(t, l)) IN
+LET access0(t, x, l) = access(t, x) AND holds(t, l) AND NOT PREVIOUS (ONCE (access(t, x))) IN
+LET hist(t, x, l) = (NOT (access(t, x) AND (ONCE access0(t, x, l)) AND NOT  holds(t, l))) SINCE access0(t, x, l) IN
+EXISTS t1, t2, x. 
+(read(t1,x) AND ONCE write(t2,x))
+OR
+(write(t1,x) AND ONCE (read(t2,x) OR write(t2,x)))
+AND NOT (EXISTS l. hist(t1, x, l) AND hist(t2, x, l))
+
