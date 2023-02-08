@@ -44,7 +44,7 @@ function gen-unbounded() {
   for i in `seq ${from} ${to}`
   do
     cp props/${name}.smfotl z_${i}.smfotl
-    cp props/${name}.mrfotl z_${i}.mrfotl
+    # cp props/${name}.mrfotl z_${i}.mrfotl
     cp props/${name}.qtl z_${i}.qtl
     cp props/${name}.permqtl z_${i}.permqtl
     cp props/datarace.sig z_${i}.sig
@@ -78,19 +78,25 @@ function gen-bounded() {
 
 function ours() {
   # lineskip "\\vmon" run01A "ratios"
-  # lineskip "\\monpoly" run01B "ratios"
+  lineskip "\\monpoly" run01B "ratios"
   lineskip "staticmon" run01C "ratios"
 }
 
 function alltools() {
+  lineskip "\\dejavu" run02A "ratios"
+  lineskip "\\dejavuperm" run02B "ratios"
   ours
-  # lineskip "\\dejavu" run02A "ratios"
-  # lineskip "\\dejavuperm" run02B "ratios"
 }
 
 function transltime() {
   echo -n "\\sracesint{[0,\\infty]}&"
   runNoTO "./mfotl2ranf props/datarace-havelund-manual"
+  echo "\\\\"
+  echo -n "\\sracesint{[0,\\infty]} let1&"
+  runNoTO "./mfotl2ranf props/datarace-havelund-manual-let1"
+  echo "\\\\"
+  echo -n "\\sracesint{[0,\\infty]} let2&"
+  runNoTO "./mfotl2ranf props/datarace-havelund-manual-let2"
   echo "\\\\"
   echo -n "\\racesint{[0,\\infty]}&"
   runNoTO "./mfotl2ranf props/datarace-havelund"
@@ -120,16 +126,47 @@ function transltime() {
 
 function static-compile() {
 
+prev_fma="bla"
+prev_base=""
+
 for fma in $(ls z_*.smfotl); do
+
+  echo "Compiling $fma"
+
+  pf=$(cat $prev_fma)
+  f=$(cat $fma)
+
+  echo $fma $prev_fma
 
   base=$(echo $fma | cut -d "." -f1)
 
-  monpoly-staticmon -sig $base.sig -formula $fma -explicitmon -explicitmon_prefix=./staticmon/src/staticmon/input_formula
+  echo $base $prev_base
 
-  cd staticmon
-  ninja -C builddir > /dev/null 2> /dev/null
-  cp ./builddir/bin/staticmon ./$base
-  cd ..
+
+  if [ "$f" != "$pf" ]; then 
+
+
+    monpoly-staticmon -sig $base.sig -formula $fma -explicitmon -explicitmon_prefix=./staticmon/src/staticmon/input_formula
+
+    echo "First time"
+
+    cd staticmon
+    ninja -C builddir > /dev/null 2> /dev/null
+    cp ./builddir/bin/staticmon ./$base
+    cd ..
+
+  else
+
+    echo "Reusing"
+
+    cd staticmon
+    cp ./$prev_base ./$base
+    cd ..
+
+  fi
+
+  prev_fma=$fma
+  prev_base=$base
 
 done
 
@@ -142,65 +179,141 @@ done
 
 }
 
+echo "Running $$"
+
+echo "Translating"
 transltime > exps_mfotl_00.tex
 
+# 1. Fixed traces
 gen-havelund 0
-gen-unbounded "datarace-havelund-manual" 0 2
-static-compile
-echo "&\\multicolumn{3}{c}{\\sracesint{[0,\\infty]}}\\\\" > exps_mfotl_01.tex
-alltools >> exps_mfotl_01.tex
+
+# Datarace formula \phi
+
+
+# Run DejaVu - original formula and MonPoly and StaticMon on translations
 gen-unbounded "datarace-havelund" 0 2
 static-compile
-echo "\\hline" >> exps_mfotl_01.tex
+echo "\\hline" > exps_mfotl_01.tex
 echo "&\\multicolumn{3}{c}{\\racesint{[0,\\infty]}}\\\\" >> exps_mfotl_01.tex
-lineskip "\\dejavu" run02A "ratios" >> exps_mfotl_01.tex
-lineskip "\\dejavuperm" run02B "ratios" >> exps_mfotl_01.tex
+alltools >> exps_mfotl_01.tex
 
-gen-ours 0 6 250
-gen-unbounded "datarace-havelund-manual" 0 6
+# Run MonPoly and StaticMon - manual non-Let formulas
+# gen-unbounded "datarace-havelund-manual" 0 2
+# static-compile
+# echo "&\\multicolumn{3}{c}{\\sracesint{[0,\\infty]}}\\\\" >> exps_mfotl_01.tex
+# alltools >> exps_mfotl_01.tex
+# gen-unbounded "datarace-havelund-manual-let1" 0 2
+# static-compile
+# echo "&\\multicolumn{3}{c}{\\sracesint{[0,\\infty]} let1}\\\\" >> exps_mfotl_01.tex
+# alltools >> exps_mfotl_01.tex
+
+# Run MonPoly and StaticMon - manual Let formula
+gen-unbounded "datarace-havelund-manual-let2" 0 2
 static-compile
-echo "&\\multicolumn{7}{c}{\\sracesint{[0,\\infty]}}\\\\" > exps_mfotl_02.tex
-alltools >> exps_mfotl_02.tex
+echo "&\\multicolumn{3}{c}{\\sracesint{[0,\\infty]} let2}\\\\" >> exps_mfotl_01.tex
+ours >> exps_mfotl_01.tex
+
+
+
+
+# b) Datarace formula \psi
+gen-unbounded "datarace-unbounded" 0 2
+static-compile
+echo "\\hline" >> exps_mfotl_01.tex
+echo "&\\multicolumn{7}{c}{\\racesintsharp{[0,\\infty]}}\\\\" >> exps_mfotl_01.tex
+alltools >> exps_mfotl_01.tex
+
+gen-unbounded "datarace-unbounded-manual" 0 2
+static-compile
+echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]}}\\\\" >> exps_mfotl_01.tex
+ours >> exps_mfotl_01.tex
+
+
+gen-unbounded "datarace-unbounded-manual-let2" 0 2
+static-compile
+echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]} let2}\\\\" >> exps_mfotl_01.tex
+ours >> exps_mfotl_01.tex
+
+
+# 2. Random traces
+gen-ours 0 6 250
+
+
+# a) Datarace formula \phi
+
+
+# Run DejaVu - original formula and MonPoly and StaticMon on translations
 gen-unbounded "datarace-havelund" 0 6
 static-compile
-echo "\\hline" >> exps_mfotl_02.tex
+echo "\\hline" > exps_mfotl_02.tex
 echo "&\\multicolumn{7}{c}{\\racesint{[0,\\infty]}}\\\\" >> exps_mfotl_02.tex
 alltools >> exps_mfotl_02.tex
 
-gen-ours 0 6 250
-gen-unbounded "datarace-unbounded-manual" 0 6
+# Run MonPoly and StaticMon - manual non-Let formula
+# gen-ours 0 6 250
+# gen-unbounded "datarace-havelund-manual" 0 6
+# static-compile
+# echo "&\\multicolumn{7}{c}{\\sracesint{[0,\\infty]}}\\\\" >> exps_mfotl_02.tex
+# alltools >> exps_mfotl_02.tex
+# gen-ours 0 6 250
+# gen-unbounded "datarace-havelund-manual-let1" 0 6
+# static-compile
+# echo "&\\multicolumn{7}{c}{\\sracesint{[0,\\infty]} let1}\\\\" >> exps_mfotl_02.tex
+# alltools >> exps_mfotl_02.tex
+
+# Run MonPoly and StaticMon - manual Let formula
+gen-unbounded "datarace-havelund-manual-let2" 0 6
 static-compile
-echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]}}\\\\" > exps_mfotl_03.tex
-alltools >> exps_mfotl_03.tex
+echo "&\\multicolumn{7}{c}{\\sracesint{[0,\\infty]} let2}\\\\" >> exps_mfotl_02.tex
+ours >> exps_mfotl_02.tex
+
+
+# b) Datarace formula \psi
+
+# Run DejaVu - original formula and MonPoly and StaticMon on translations
 gen-unbounded "datarace-unbounded" 0 6
 static-compile
-echo "\\hline" >> exps_mfotl_03.tex
+echo "\\hline" > exps_mfotl_03.tex
 echo "&\\multicolumn{7}{c}{\\racesintsharp{[0,\\infty]}}\\\\" >> exps_mfotl_03.tex
 alltools >> exps_mfotl_03.tex
 
-gen-ours 0 5 250
-gen-bounded "datarace-upper" 0 5 250 0
+# Run MonPoly and StaticMon - manual non-Let formula
+gen-unbounded "datarace-unbounded-manual" 0 6
+static-compile
+echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]}}\\\\" >> exps_mfotl_03.tex
+ours >> exps_mfotl_03.tex
+
+# Run MonPoly and StaticMon - manual Let formula
+gen-unbounded "datarace-unbounded-manual-let2" 0 6
+static-compile
+echo "&\\multicolumn{7}{c}{\\sracesintsharp{[0,\\infty]} let2}\\\\" >> exps_mfotl_03.tex
+ours >> exps_mfotl_03.tex
+
+
+# c) Datarace formula upper bounded
+gen-bounded "datarace-upper" 0 6 250 0
 static-compile
 alltools > exps_mfotl_04.tex
 
-gen-ours 0 3 4000
-gen-unbounded "past-unbounded" 0 3
+# d) Blind write formula
+gen-unbounded "past-unbounded" 0 6
 static-compile
 alltools > exps_mfotl_05.tex
 
-gen-ours 0 6 250
+# e) Blind write formula upper bounded
 gen-bounded "past-upper" 0 6 250 0
 static-compile
 echo "&\\multicolumn{7}{c}{\\pastlockint{[0,\\tracelength/10]}}\\\\" > exps_mfotl_06.tex
 alltools >> exps_mfotl_06.tex
+
+# f) Blind write formula lower bounded
 gen-bounded "past-lower" 0 6 250 1
 static-compile
 echo "\\hline" >> exps_mfotl_06.tex
 echo "&\\multicolumn{7}{c}{\\pastlockint{[\\tracelength/10,\\infty]}}\\\\" >> exps_mfotl_06.tex
 alltools >> exps_mfotl_06.tex
 
-gen-ours 0 3 4000
-gen-bounded "future-upper" 0 3 4000 0
+# g) Needles read formula upper bounded
+gen-bounded "future-upper" 0 6 250 0
 static-compile
 ours > exps_mfotl_07.tex
-lineskip "\\mpreg" run03 "ratios" >> exps_mfotl_07.tex

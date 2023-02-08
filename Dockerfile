@@ -1,8 +1,10 @@
 FROM ubuntu:22.10
 
+
+RUN sed -i "s/http\:\/\/archive\.ubuntu\.com\//http\:\/\/ubuntu\.ethz\.ch\//g" /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y automake bc bison ca-certificates clang flex git gnuplot libgmp3-dev libssl-dev locales m4 opam openjdk-8-jdk python3 scala texlive vim
+RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y automake bc bison ca-certificates clang flex git gnuplot libgmp3-dev libssl-dev locales lld llvm make ninja-build m4 opam openjdk-8-jdk python3 python3-pip python3-setuptools scala texlive vim
 
 RUN adduser --disabled-password --gecos "" mfotlranf
 RUN locale-gen en_US.UTF-8 &&\
@@ -47,6 +49,29 @@ RUN eval `opam config env`; make -C src
 # Tools
 RUN make -C sinceuntil
 RUN make -C tools
+
+
+# RUN wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1.tar.gz; tar -zxvf cmake-3.25.1.tar.gz; cd cmake-3.25.1; ./bootstrap; make
+# USER root
+# RUN cd cmake-3.25.1; make install
+# RUN pip3 install conan
+# USER mfotlranf
+
+# RUN git clone https://github.com/matthieugras/staticmon.git; 
+# RUN cd staticmon;  
+# RUN echo -e "./setup.sh << EOF\ng\n12\ny\nEOF" > bla.sh
+# RUN bash bla.sh
+# RUN ./configure.sh; cd ..
+# RUN chmod a+x ./monpoly/monpoly
+
+
+RUN cd ~ ; git clone https://github.com/matthieugras/monpoly.git monpoly-staticmon; cd monpoly-staticmon; eval `opam config env`; dune build --release
+USER root
+RUN ln -s /home/mfotlranf/monpoly-staticmon/_build/install/default/bin/monpoly /usr/bin/monpoly-staticmon
+USER mfotlranf
+
+
+
 
 # Startup
 USER root
